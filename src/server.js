@@ -50,7 +50,7 @@ mongoose.connection.once("open", async () => {
 });
 
 /* ================== WHATSAPP ================== */
-startWhatsApp();
+//startWhatsApp();
 
 app.get("/qr", (req, res) => {
   res.json({
