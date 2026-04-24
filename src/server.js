@@ -23,16 +23,29 @@ mongoose.connect(process.env.MONGO_URI)
 .then(() => console.log("MongoDB Atlas Connected ✅"))
 .catch(err => console.log(err));
 
+app.get("/create-admin", async (req, res) => {
+  await Admin.deleteMany({}); // reset dulu biar pasti
+  await Admin.create({
+    username: "admin",
+    password: "12345",
+  });
+
+  res.send("Admin dibuat ulang ✅");
+});
+
 mongoose.connection.once("open", async () => {
-  const existing = await Admin.findOne({ username: "admin" });
+  console.log("MongoDB connected");
+
+  let existing = await Admin.findOne({ username: "admin" });
 
   if (!existing) {
     await Admin.create({
       username: "admin",
       password: "12345",
     });
-
     console.log("Admin default dibuat ✅");
+  } else {
+    console.log("Admin sudah ada ✅");
   }
 });
 
