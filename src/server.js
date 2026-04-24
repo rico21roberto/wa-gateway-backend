@@ -7,17 +7,22 @@ const bodyParser = require("body-parser");
 const cors = require("cors");
 const mongoose = require("mongoose");
 const cookieParser = require("cookie-parser");
-const { sendMessage, getQR, getStatus } = require("./whatsapp");
+const {
+  startWhatsApp,
+  sendMessage,
+  getQR,
+  getStatus,
+} = require("./whatsapp");
 const Admin = require("./models/Admin");
 const fs = require("fs");
 require("dotenv").config();
 
 const app = express();
 
-/* ================== FIX UPLOAD FOLDER ================== */
-if (!fs.existsSync("upload")) {
-  fs.mkdirSync("upload");
-}
+/* ================== FIX FOLDER ================== */
+if (!fs.existsSync("upload")) fs.mkdirSync("upload");
+
+/* ================== MULTER ================== */
 const upload = multer({ dest: "upload/" });
 
 /* ================== MIDDLEWARE ================== */
@@ -35,14 +40,15 @@ process.on("unhandledRejection", (err) => {
 });
 
 /* ================== DATABASE ================== */
-mongoose.connect(process.env.MONGO_URI)
+mongoose
+  .connect(process.env.MONGO_URI)
   .then(() => console.log("MongoDB Atlas Connected ✅"))
-  .catch(err => console.log(err));
+  .catch((err) => console.log(err));
 
 mongoose.connection.once("open", async () => {
   console.log("MongoDB connected");
 
-  let existing = await Admin.findOne({ username: "admin" });
+  const existing = await Admin.findOne({ username: "admin" });
 
   if (!existing) {
     await Admin.create({
@@ -55,12 +61,15 @@ mongoose.connection.once("open", async () => {
   }
 });
 
+/* ================== START WHATSAPP (INI PENTING) ================== */
+startWhatsApp();
+
 /* ================== ROOT ================== */
 app.get("/", (req, res) => {
   res.send("API Running ✅");
 });
 
-/* ================== QR WA ================== */
+/* ================== QR ================== */
 app.get("/qr", (req, res) => {
   res.json({
     qr: getQR(),
@@ -84,6 +93,7 @@ app.post("/login", async (req, res) => {
       user: admin,
     });
   } catch (err) {
+    console.log(err);
     res.status(500).json({ error: "Server error" });
   }
 });
@@ -101,6 +111,7 @@ app.get("/paspor", async (req, res) => {
     const data = await Paspor.find(query).limit(100);
     res.json(data);
   } catch (err) {
+    console.log(err);
     res.status(500).json(err);
   }
 });
@@ -164,6 +175,7 @@ app.get("/grafik-pengaduan", async (req, res) => {
 
     res.json(data);
   } catch (err) {
+    console.log(err);
     res.status(500).json(err);
   }
 });
@@ -179,6 +191,7 @@ app.get("/grafik-paspor", async (req, res) => {
       },
     ]);
   } catch (err) {
+    console.log(err);
     res.status(500).json(err);
   }
 });

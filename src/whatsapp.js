@@ -23,110 +23,112 @@ function delay(ms) {
 
 // ================= START =================
 async function startWhatsApp() {
-  const { state, saveCreds } = await useMultiFileAuthState("auth");
-  const { version } = await fetchLatestBaileysVersion();
+  try {
+    const { state, saveCreds } = await useMultiFileAuthState("auth");
+    const { version } = await fetchLatestBaileysVersion();
 
-  sock = makeWASocket({
-    version,
-    auth: state,
-    browser: ["Windows", "Chrome", "120.0"],
-  });
+    sock = makeWASocket({
+      version,
+      auth: state,
+      browser: ["Ubuntu", "Chrome", "120.0"], // 🔥 FIX RAILWAY
+    });
 
-  sock.ev.on("creds.update", saveCreds);
+    sock.ev.on("creds.update", saveCreds);
 
-  // ================= CONNECTION =================
-  sock.ev.on("connection.update", async (update) => {
-    const { connection, qr, lastDisconnect } = update;
+    // ================= CONNECTION =================
+    sock.ev.on("connection.update", async (update) => {
+      const { connection, qr, lastDisconnect } = update;
 
-    // QR MASUK
-    if (qr) {
-      console.log("QR updated");
-
-      try {
-        latestQR = await QRCode.toDataURL(qr);
-        isConnected = false;
-      } catch (err) {
-        console.log("QR ERROR:", err);
-      }
-    }
-
-    // CONNECTED
-    if (connection === "open") {
-      console.log("WhatsApp Connected ✅");
-      isConnected = true;
-
-      // kasih waktu frontend render QR
-      setTimeout(() => {
-        latestQR = null;
-      }, 3000);
-    }
-
-    // DISCONNECT
-    if (connection === "close") {
-      const reason = lastDisconnect?.error?.output?.statusCode;
-
-      console.log("Disconnected:", reason);
-
-      isConnected = false;
-      latestQR = null;
-
-      // reset state biar aman
-      userState = {};
-      lastMessageTime = {};
-
-      // 🔥 FIX BANNED / DEVICE REMOVED
-      if (reason === 401) {
-        console.log("Session expired → hapus auth");
+      // 🔥 QR MASUK
+      if (qr) {
+        console.log("QR updated");
 
         try {
-          fs.rmSync("auth", { recursive: true, force: true });
+          latestQR = await QRCode.toDataURL(qr);
+          isConnected = false;
         } catch (err) {
-          console.log("Gagal hapus auth:", err);
+          console.log("QR ERROR:", err);
+        }
+      }
+
+      // 🔥 CONNECTED
+      if (connection === "open") {
+        console.log("WhatsApp Connected ✅");
+        isConnected = true;
+
+        setTimeout(() => {
+          latestQR = null;
+        }, 3000);
+      }
+
+      // 🔥 DISCONNECT
+      if (connection === "close") {
+        const reason = lastDisconnect?.error?.output?.statusCode;
+
+        console.log("Disconnected:", reason);
+
+        isConnected = false;
+        latestQR = null;
+        userState = {};
+        lastMessageTime = {};
+
+        // ❗ SESSION EXPIRED
+        if (reason === 401) {
+          console.log("Session expired → reset auth");
+
+          try {
+            fs.rmSync("auth", { recursive: true, force: true });
+          } catch (err) {
+            console.log("Gagal hapus auth:", err);
+          }
+
+          return startWhatsApp();
         }
 
-        return startWhatsApp();
+        // 🔥 RECONNECT DELAY (PENTING)
+        if (reason !== DisconnectReason.loggedOut) {
+          console.log("Reconnect 5 detik...");
+          setTimeout(() => {
+            startWhatsApp();
+          }, 5000);
+        } else {
+          console.log("Logged out, scan ulang manual");
+        }
       }
+    });
 
-      // reconnect normal
-      if (reason !== DisconnectReason.loggedOut) {
-        console.log("Reconnect...");
-        startWhatsApp();
-      } else {
-        console.log("Logged out, scan ulang");
+    // ================= LISTENER =================
+    sock.ev.on("messages.upsert", async ({ messages }) => {
+      try {
+        const msg = messages[0];
+
+        if (!msg.message || msg.key.fromMe) return;
+
+        const sender = msg.key.remoteJid;
+
+        if (sender.includes("status@broadcast")) return;
+
+        let text =
+          msg.message.conversation ||
+          msg.message.extendedTextMessage?.text;
+
+        if (!text) return;
+
+        text = text.toLowerCase().trim();
+
+        if (text.length > 100) return;
+
+        console.log("Pesan masuk:", text);
+
+        await handleMessage(sender, text);
+      } catch (err) {
+        console.log("ERROR MESSAGE:", err);
       }
-    }
-  });
+    });
 
-  // ================= LISTENER =================
-  sock.ev.on("messages.upsert", async ({ messages }) => {
-    try {
-      const msg = messages[0];
-
-      if (!msg.message || msg.key.fromMe) return;
-
-      const sender = msg.key.remoteJid;
-
-      // ❌ skip broadcast/status
-      if (sender.includes("status@broadcast")) return;
-
-      let text =
-        msg.message.conversation ||
-        msg.message.extendedTextMessage?.text;
-
-      if (!text) return;
-
-      text = text.toLowerCase().trim();
-
-      // ❌ filter spam panjang
-      if (text.length > 100) return;
-
-      console.log("Pesan masuk:", text);
-
-      await handleMessage(sender, text);
-    } catch (err) {
-      console.log("ERROR MESSAGE:", err);
-    }
-  });
+  } catch (err) {
+    console.log("START ERROR:", err);
+  }
 }
 
 // ================= HANDLE =================
@@ -134,14 +136,12 @@ async function handleMessage(sender, text) {
   try {
     const now = Date.now();
 
-    // 🚫 RATE LIMIT (5 detik)
     if (lastMessageTime[sender] && now - lastMessageTime[sender] < 5000) {
       return;
     }
 
     lastMessageTime[sender] = now;
 
-    // ================= MENU =================
     if (text === "halo" || text === "menu") {
       userState[sender] = "menu";
 
@@ -180,7 +180,7 @@ async function handleMessage(sender, text) {
       });
     }
 
-    // ================= PENGADUAN =================
+    // PENGADUAN
     if (userState[sender] === "pengaduan") {
       const ticket = await Ticket.create({
         phone: sender,
@@ -196,7 +196,7 @@ No Tiket: ${ticket._id}`
       });
     }
 
-    // ================= CEK PASPOR =================
+    // CEK PASPOR
     if (userState[sender] === "cek_status_paspor") {
       const result = await Paspor.findOne({
         no_permohonan: text,
@@ -221,7 +221,6 @@ Status: Paspor Anda sudah selesai, silahkan diambil ke kantor imigrasi belawan.`
       });
     }
 
-    // ================= DEFAULT =================
     await delay(1500);
     return sock.sendMessage(sender, {
       text: "Ketik *menu* ya 😊"
@@ -232,7 +231,7 @@ Status: Paspor Anda sudah selesai, silahkan diambil ke kantor imigrasi belawan.`
   }
 }
 
-// ================= SEND MANUAL =================
+// ================= SEND =================
 function sendMessage(phone, message) {
   if (!sock) return;
 
