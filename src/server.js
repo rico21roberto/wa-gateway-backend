@@ -7,18 +7,17 @@ const bodyParser = require("body-parser");
 const cors = require("cors");
 const mongoose = require("mongoose");
 const cookieParser = require("cookie-parser");
-const { startWhatsApp, sendMessage, getQR, getStatus } = require("./whatsapp");
+const { sendMessage, getQR, getStatus } = require("./whatsapp");
 const Admin = require("./models/Admin");
 const fs = require("fs");
 require("dotenv").config();
 
 const app = express();
 
-/* ================== FIX FOLDER UPLOAD ================== */
+/* ================== FIX UPLOAD FOLDER ================== */
 if (!fs.existsSync("upload")) {
   fs.mkdirSync("upload");
 }
-
 const upload = multer({ dest: "upload/" });
 
 /* ================== MIDDLEWARE ================== */
@@ -26,7 +25,7 @@ app.use(cors({ origin: "*" }));
 app.use(bodyParser.json());
 app.use(cookieParser());
 
-/* ================== GLOBAL ERROR HANDLER ================== */
+/* ================== GLOBAL ERROR ================== */
 process.on("uncaughtException", (err) => {
   console.log("UNCAUGHT ERROR:", err);
 });
@@ -61,10 +60,7 @@ app.get("/", (req, res) => {
   res.send("API Running ✅");
 });
 
-/* ================== WHATSAPP ================== */
-// ❌ MATIKAN DULU BIAR GA 502
-// startWhatsApp();
-
+/* ================== QR WA ================== */
 app.get("/qr", (req, res) => {
   res.json({
     qr: getQR(),
@@ -72,7 +68,7 @@ app.get("/qr", (req, res) => {
   });
 });
 
-/* ================== AUTH ================== */
+/* ================== LOGIN ================== */
 app.post("/login", async (req, res) => {
   try {
     const { username, password } = req.body;
@@ -112,6 +108,10 @@ app.get("/paspor", async (req, res) => {
 /* ================== UPLOAD EXCEL ================== */
 app.post("/upload-excel", upload.single("file"), async (req, res) => {
   try {
+    if (!req.file) {
+      return res.status(400).json({ error: "File tidak ada" });
+    }
+
     const filePath = req.file.path;
 
     const workbook = XLSX.readFile(filePath);
@@ -133,7 +133,6 @@ app.post("/api/ticket", async (req, res) => {
   try {
     const { phone, message } = req.body;
 
-    // aman walau WA mati
     if (sendMessage) {
       await sendMessage(phone, "Ticket diterima: " + message);
     }
@@ -152,7 +151,10 @@ app.get("/grafik-pengaduan", async (req, res) => {
       {
         $group: {
           _id: {
-            $dateToString: { format: "%Y-%m-%d", date: "$createdAt" },
+            $dateToString: {
+              format: "%Y-%m-%d",
+              date: "$createdAt",
+            },
           },
           total: { $sum: 1 },
         },
@@ -184,6 +186,6 @@ app.get("/grafik-paspor", async (req, res) => {
 /* ================== START SERVER ================== */
 const PORT = process.env.PORT || 3000;
 
-app.listen(PORT, () => {
+app.listen(PORT, "0.0.0.0", () => {
   console.log("Server running on port", PORT);
 });
