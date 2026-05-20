@@ -246,7 +246,7 @@ Status: Paspor Anda sudah selesai, silahkan diambil ke kantor imigrasi belawan.`
 }
 
 // ================= SEND =================
-function sendMessage(phone, message) {
+async function sendMessage(phone, message) {
   if (!sock || !isConnected) return;
 
   const jid = phone + "@s.whatsapp.net";
