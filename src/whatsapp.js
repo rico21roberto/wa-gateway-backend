@@ -30,7 +30,8 @@ async function startWhatsApp() {
     sock = makeWASocket({
       version,
       auth: state,
-      browser: ["Ubuntu", "Chrome", "120.0"], // 🔥 FIX RAILWAY
+      browser: ["Ubuntu", "Chrome", "120.0"], 
+      syncFullHistory: false,
     });
 
     sock.ev.on("creds.update", saveCreds);
