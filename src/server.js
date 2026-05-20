@@ -127,7 +127,12 @@ app.post("/upload-excel", upload.single("file"), async (req, res) => {
 
     const workbook = XLSX.readFile(filePath);
     const sheet = workbook.Sheets[workbook.SheetNames[0]];
-    const data = XLSX.utils.sheet_to_json(sheet);
+    const raw = XLSX.utils.sheet_to_json(sheet);
+    const data = raw.map((item) => ({
+      no_permohonan: item["No Permohonan"],
+      no_paspor: item["No Paspor"],
+      nama: item["Nama"],
+}));
 
     await Paspor.deleteMany({});
     await Paspor.insertMany(data, { ordered: false });

@@ -134,6 +134,9 @@ async function startWhatsApp() {
 // ================= HANDLE =================
 async function handleMessage(sender, text) {
   try {
+
+    await delay(3000 + Math.random() * 3000);
+
     const now = Date.now();
 
     if (lastMessageTime[sender] && now - lastMessageTime[sender] < 5000) {
@@ -145,27 +148,38 @@ async function handleMessage(sender, text) {
     if (text === "halo" || text === "menu") {
       userState[sender] = "menu";
 
-      await delay(1500);
+      await delay(2000 + Math.random() * 3000);
       return sock.sendMessage(sender, {
         text: `Selamat datang di Imigrasi Belawan 👋
 
-1. Info Paspor
+1. Persyaratan dan Prosedur Pembuatan Paspor
 2. Pengaduan
 3. Cek Status Paspor`
       });
     }
 
     if (text === "1") {
-      await delay(1500);
+      await delay(2000 + Math.random() * 3000);
       return sock.sendMessage(sender, {
-        text: "Syarat Paspor:\n- KTP\n- KK\n- Akta Lahir"
+        text: `📄 Persyaratan Paspor:
+
+              - KTP
+              - Kartu Keluarga (KK)
+              - Akta Kelahiran / Ijazah
+
+              📝 Prosedur:
+                  1. Daftar online / datang ke kantor
+                  2. Verifikasi berkas
+                  3. Foto & wawancara
+                  4. Pembayaran
+                  5. Pengambilan paspor`
       });
     }
 
     if (text === "2") {
       userState[sender] = "pengaduan";
 
-      await delay(1500);
+      await delay(2000 + Math.random() * 3000);
       return sock.sendMessage(sender, {
         text: "Silakan kirim pengaduan Anda."
       });
@@ -174,7 +188,7 @@ async function handleMessage(sender, text) {
     if (text === "3") {
       userState[sender] = "cek_status_paspor";
 
-      await delay(1500);
+      await delay(3000 + Math.random() * 3000);
       return sock.sendMessage(sender, {
         text: "Masukkan Nomor Permohonan Anda"
       });
@@ -189,7 +203,7 @@ async function handleMessage(sender, text) {
 
       userState[sender] = null;
 
-      await delay(1500);
+      await delay(2000 + Math.random() * 3000);
       return sock.sendMessage(sender, {
         text: `Pengaduan diterima ✅
 No Tiket: ${ticket._id}`
@@ -204,7 +218,7 @@ No Tiket: ${ticket._id}`
 
       userState[sender] = null;
 
-      await delay(1500);
+      await delay(2000 + Math.random() * 3000);
 
       if (!result) {
         return sock.sendMessage(sender, {
@@ -221,7 +235,7 @@ Status: Paspor Anda sudah selesai, silahkan diambil ke kantor imigrasi belawan.`
       });
     }
 
-    await delay(1500);
+    await delay(2000 + Math.random() * 3000);
     return sock.sendMessage(sender, {
       text: "Ketik *menu* ya 😊"
     });
@@ -233,9 +247,12 @@ Status: Paspor Anda sudah selesai, silahkan diambil ke kantor imigrasi belawan.`
 
 // ================= SEND =================
 function sendMessage(phone, message) {
-  if (!sock) return;
+  if (!sock || !isConnected) return;
 
   const jid = phone + "@s.whatsapp.net";
+  
+  await delay(5000 + Math.random() * 5000);
+  
   return sock.sendMessage(jid, { text: message });
 }
 
