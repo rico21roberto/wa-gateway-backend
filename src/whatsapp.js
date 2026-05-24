@@ -162,18 +162,39 @@ async function handleMessage(sender, text) {
     if (text === "1") {
       await delay(2000 + Math.random() * 3000);
       return sock.sendMessage(sender, {
-        text: `📄 Persyaratan Paspor:
+        text: `📄 *INFO PERSYARATAN & PROSEDUR PASPOR*
 
-              - KTP
-              - Kartu Keluarga (KK)
-              - Akta Kelahiran / Ijazah
+🔹 *Paspor Baru*
+Syarat:
+1. KTP asli
+2. KK asli
+3. Akta lahir / Ijazah / Buku Nikah / Surat Baptis
 
-              📝 Prosedur:
-                  1. Daftar online / datang ke kantor
-                  2. Verifikasi berkas
-                  3. Foto & wawancara
-                  4. Pembayaran
-                  5. Pengambilan paspor`
+🔹 *Perpanjang Paspor*
+Syarat:
+- Wajib melampirkan paspor lama
+
+💰 *Biaya Pembuatan / Perpanjangan*
+1. Non Elektronik 5 tahun : Rp 350.000
+2. Non Elektronik 10 tahun : Rp 650.000
+3. Elektronik 5 tahun : Rp 650.000
+4. Elektronik 10 tahun : Rp 950.000
+
+⏱️ Proses: 4 hari kerja setelah pembayaran
+
+🔹 *Paspor Hilang / Rusak*
+Syarat:
+1. Surat kehilangan dari kepolisian
+
+💰 Biaya:
+- Hilang : Rp 1.000.000
+- Rusak : Rp 500.000
+
+⏱️ Proses: 4 hari kerja setelah pembayaran
+
+📲 Download aplikasi M-Paspor:
+https://play.google.com/store/apps/details?id=id.go.imigrasi.paspor_online
+`
       });
     }
 
