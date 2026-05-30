@@ -151,18 +151,18 @@ async function handleMessage(sender, text) {
 
       await delay(2000 + Math.random() * 3000);
       return sock.sendMessage(sender, {
-        text: `Selamat datang di Imigrasi Belawan 👋
-
-1. Persyaratan dan Prosedur Pembuatan Paspor
-2. Pengaduan
-3. Cek Status Paspor`
+        text: `Selamat Datang di Kantor Imigrasi Belawan 👋
+              Silakan pilih menu terlebih dahulu:
+              1. Persyaratan dan Prosedur Pembuatan Paspor
+              2. Pengaduan
+              3. Cek Status Paspor`
       });
     }
 
     if (text === "1") {
       
       delete userState[sender];
-      
+
       await delay(2000 + Math.random() * 3000);
       
       return sock.sendMessage(sender, {
