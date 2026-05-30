@@ -153,7 +153,7 @@ async function handleMessage(sender, text) {
       return sock.sendMessage(sender, {
         text: `Selamat Datang di Kantor Imigrasi Belawan 👋
               Silakan pilih menu terlebih dahulu:
-              1. Persyaratan dan Prosedur Pembuatan Paspor
+              1. Persyaratan dan Prosedur Pembuatan/Perpanjangan Paspor
               2. Pengaduan
               3. Cek Status Paspor`
       });
@@ -179,10 +179,8 @@ async function handleMessage(sender, text) {
             - Wajib melampirkan paspor lama
 
             💰 *Biaya Pembuatan / Perpanjangan*
-            1. Non Elektronik 5 tahun : Rp 350.000
-            2. Non Elektronik 10 tahun : Rp 650.000
-            3. Elektronik 5 tahun : Rp 650.000
-            4. Elektronik 10 tahun : Rp 950.000
+            1. Elektronik 5 tahun : Rp 650.000
+            2. Elektronik 10 tahun : Rp 950.000
 
             ⏱️ Proses: 4 hari kerja setelah pembayaran
 
@@ -190,7 +188,7 @@ async function handleMessage(sender, text) {
             Syarat:
             1. Surat kehilangan dari kepolisian
 
-            💰 Biaya:
+            💰 Biaya Denda:
             - Hilang : Rp 1.000.000
             - Rusak : Rp 500.000
 
