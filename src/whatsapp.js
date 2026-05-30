@@ -146,7 +146,7 @@ async function handleMessage(sender, text) {
 
     lastMessageTime[sender] = now;
 
-    if (text === "halo" || text === "menu") {
+    if (!userState[sender] && text !== "1" && text !== "2" && text !== "3") {
       userState[sender] = "menu";
 
       await delay(2000 + Math.random() * 3000);
@@ -160,40 +160,44 @@ async function handleMessage(sender, text) {
     }
 
     if (text === "1") {
+      
+      delete userState[sender];
+      
       await delay(2000 + Math.random() * 3000);
+      
       return sock.sendMessage(sender, {
         text: `📄 *INFO PERSYARATAN & PROSEDUR PASPOR*
 
-🔹 *Paspor Baru*
-Syarat:
-1. KTP asli
-2. KK asli
-3. Akta lahir / Ijazah / Buku Nikah / Surat Baptis
+            🔹 *Paspor Baru*
+            Syarat:
+            1. KTP asli
+            2. KK asli
+            3. Akta lahir / Ijazah / Buku Nikah / Surat Baptis
 
-🔹 *Perpanjang Paspor*
-Syarat:
-- Wajib melampirkan paspor lama
+            🔹 *Perpanjang Paspor*
+            Syarat:
+            - Wajib melampirkan paspor lama
 
-💰 *Biaya Pembuatan / Perpanjangan*
-1. Non Elektronik 5 tahun : Rp 350.000
-2. Non Elektronik 10 tahun : Rp 650.000
-3. Elektronik 5 tahun : Rp 650.000
-4. Elektronik 10 tahun : Rp 950.000
+            💰 *Biaya Pembuatan / Perpanjangan*
+            1. Non Elektronik 5 tahun : Rp 350.000
+            2. Non Elektronik 10 tahun : Rp 650.000
+            3. Elektronik 5 tahun : Rp 650.000
+            4. Elektronik 10 tahun : Rp 950.000
 
-⏱️ Proses: 4 hari kerja setelah pembayaran
+            ⏱️ Proses: 4 hari kerja setelah pembayaran
 
-🔹 *Paspor Hilang / Rusak*
-Syarat:
-1. Surat kehilangan dari kepolisian
+            🔹 *Paspor Hilang / Rusak*
+            Syarat:
+            1. Surat kehilangan dari kepolisian
 
-💰 Biaya:
-- Hilang : Rp 1.000.000
-- Rusak : Rp 500.000
+            💰 Biaya:
+            - Hilang : Rp 1.000.000
+            - Rusak : Rp 500.000
 
-⏱️ Proses: 4 hari kerja setelah pembayaran
+            ⏱️ Proses: 4 hari kerja setelah pembayaran
 
-📲 Download aplikasi M-Paspor:
-https://play.google.com/store/apps/details?id=id.go.imigrasi.paspor_online
+            📲 Download aplikasi M-Paspor:
+            https://play.google.com/store/apps/details?id=id.go.imigrasi.paspor_online
 `
       });
     }
@@ -223,7 +227,7 @@ https://play.google.com/store/apps/details?id=id.go.imigrasi.paspor_online
         message: text,
       });
 
-      userState[sender] = null;
+      delete userState[sender];
 
       await delay(2000 + Math.random() * 3000);
       return sock.sendMessage(sender, {
@@ -238,7 +242,7 @@ No Tiket: ${ticket._id}`
         no_permohonan: text,
       });
 
-      userState[sender] = null;
+      delete userState[sender];
 
       await delay(2000 + Math.random() * 3000);
 
@@ -257,11 +261,7 @@ Status: Paspor Anda sudah selesai, silahkan diambil ke kantor imigrasi belawan.`
       });
     }
 
-    await delay(2000 + Math.random() * 3000);
-    return sock.sendMessage(sender, {
-      text: "Ketik *menu* ya 😊"
-    });
-
+    
   } catch (err) {
     console.log("ERROR HANDLE:", err);
   }
