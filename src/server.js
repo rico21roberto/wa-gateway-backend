@@ -127,20 +127,52 @@ app.post("/upload-excel", upload.single("file"), async (req, res) => {
 
     const workbook = XLSX.readFile(filePath);
     const sheet = workbook.Sheets[workbook.SheetNames[0]];
-    const raw = XLSX.utils.sheet_to_json(sheet);
-    const data = raw.map((item) => ({
-      no_permohonan: item["No Permohonan"],
-      no_paspor: item["No Paspor"],
-      nama: item["Nama"],
-}));
 
+    const raw = XLSX.utils.sheet_to_json(sheet, {
+      defval: "",
+    });
+    console.log("Data dari Excel:", raw[0]);
+     const data = raw
+      .map((item) => ({
+          no_permohonan:
+            item["No Permohonan"] ||
+            item["NO PERMOHONAN"] ||
+            "",
+
+          no_paspor:
+            item["No Paspor"] ||
+            item["NO PASPOR"] ||
+            "",
+
+          nama:
+            item["Nama"] ||
+            item["NAMA"] ||
+            "",
+      }))
+      .filter(
+        (item) =>
+          item.no_permohonan ||
+          item.no_paspor ||
+          item.nama
+      );
+
+    // hapus data lama
     await Paspor.deleteMany({});
-    await Paspor.insertMany(data, { ordered: false });
 
-    res.json({ message: "Upload berhasil ✅" });
+    // insert data baru
+    await Paspor.insertMany(data);
+
+    res.json({
+      message: "Upload berhasil ✅",
+      total: data.length,
+    });
+
   } catch (err) {
     console.log(err);
-    res.status(500).json({ error: "Gagal upload" });
+
+    res.status(500).json({
+      error: "Gagal upload",
+    });
   }
 });
 
