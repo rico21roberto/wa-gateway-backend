@@ -129,6 +129,7 @@ app.post("/upload-excel", upload.single("file"), async (req, res) => {
     const sheet = workbook.Sheets[workbook.SheetNames[0]];
 
     const raw = XLSX.utils.sheet_to_json(sheet, {
+      range: 2,
       defval: "",
     });
     console.log("Data dari Excel:", raw[0]);
