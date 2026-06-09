@@ -195,7 +195,9 @@ async function handleMessage(sender, text) {
             ⏱️ Proses: 4 hari kerja setelah pembayaran
 
             📲 Download aplikasi M-Paspor:
-            https://play.google.com/store/apps/details?id=id.go.imigrasi.paspor_online
+             Download Play Store https://play.google.com/store/apps/details?id=id.go.imigrasi.paspor_online
+
+             Download App Store https://apps.apple.com/id/app/m-paspor/id1576336459
 `
       });
     }
