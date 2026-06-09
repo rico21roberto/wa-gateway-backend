@@ -73,7 +73,7 @@ app.get("/", (req, res) => {
 app.get("/qr", (req, res) => {
   res.json({
     qr: getQR(),
-    status: getStatus(),
+    connected: getStatus(),
   });
 });
 
